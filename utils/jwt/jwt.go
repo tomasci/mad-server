@@ -71,3 +71,53 @@ func ExpireInMonths(months int) (int64, time.Time) {
 	t := time.Now().Add(period)
 	return t.Unix(), t
 }
+
+func ParseToken(token string) (*jwt.Token, error) {
+	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
+		}
+
+		jwtSecret := []byte(os.Getenv("JWTSECRET"))
+
+		return jwtSecret, nil
+	})
+
+	return parsedToken, err
+}
+
+func ValidateToken(rawAccessToken string, rawRefreshToken string) (string, error) {
+	_, accessTokenErr := ParseToken(rawAccessToken)
+	refreshToken, refreshTokenErr := ParseToken(rawRefreshToken)
+
+	// if refresh token is not valid, user must log in again
+	if refreshTokenErr != nil {
+		return "", errors.New("token_refresh_token_invalid_token")
+	}
+
+	// get refresh token claims
+	refreshTokenClaims, ok := refreshToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("token_refresh_token_invalid_claims")
+	}
+
+	// if access token is not valid
+	if accessTokenErr != nil {
+		// create new token
+		accessTokenData := make(map[string]interface{})
+		accessTokenData["id"] = refreshTokenClaims["id"]
+		accessTokenExp, _ := ExpireInMinutes(1)
+		newAccessTokenString, newAccessTokenErr := CreateJWTToken(accessTokenData, accessTokenExp)
+
+		// if failed - error
+		if newAccessTokenErr != nil {
+			return "", errors.New("token_access_token_create_failed")
+		}
+
+		// return new token
+		return newAccessTokenString, nil
+	}
+
+	// if everything is fine - return old token
+	return rawAccessToken, nil
+}

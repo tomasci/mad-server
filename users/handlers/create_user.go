@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"log"
 	"mad_backend_v1/app_middlewares"
 	"mad_backend_v1/models"
 	"mad_backend_v1/utils"
@@ -18,30 +18,35 @@ type CreateUserRequest struct {
 	Email    string `json:"email" validate:"required,min=1"`
 }
 
-type CreateUserResponse struct {
-	Token string `json:"token"`
-}
-
 func createUser(db *gorm.DB, data CreateUserRequest) (bool, error) {
+	tx := db.Begin()
+
 	// hashing password
 	passwordHash, err := crypto.HashCreate(data.Password)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		tx.Commit()
+		return false, errors.New("password_hash_create_failed")
 	}
 
 	// applying user data to user model
 	user := models.User{ID: uuid.New(), Username: data.Username, Password: passwordHash, Email: data.Email}
 	// trying to create user
-	result := db.Create(&user)
+	result := tx.Create(&user)
 
 	// handle gorm errors
 	if result.Error != nil {
+		tx.Rollback()
+
 		// handling postgres errors
 		pgError := database.ErrorHandler(result.Error)
 		if pgError != nil {
+
 			return false, pgError
 		}
 	}
+
+	tx.Commit()
 
 	return true, nil
 }
@@ -57,7 +62,6 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// signing in if user created
-	// basically body is the same and contains required username & password
-	LoginUserHandler(w, r)
+	utils.MakeResponse[any](w, 200, nil)
+	return
 }

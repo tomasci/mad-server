@@ -3,10 +3,9 @@ package app_middlewares
 import (
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"mad_backend_v1/utils"
+	mjwt "mad_backend_v1/utils/jwt"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
@@ -41,34 +40,6 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// second part is token
-		tokenString := authHeaderParts[1]
-
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
-			}
-
-			jwtSecret := []byte(os.Getenv("JWTSECRET"))
-
-			return jwtSecret, nil
-		})
-
-		if err != nil {
-			fmt.Printf("invalid_authorization_token %v\n", err)
-			//http.Error(w, "invalid_authorization_token", http.StatusUnauthorized)
-			utils.MakeErrorResponse[any](w, 401, nil, errors.New("invalid_authorization_token"))
-			return
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-
-		if !ok {
-			//http.Error(w, "invalid_token_claims", http.StatusUnauthorized)
-			utils.MakeErrorResponse[any](w, 401, nil, errors.New("invalid_token_claims"))
-			return
-		}
-
 		// read cookie
 		cookies := r.Cookies()
 		fmt.Printf("cookies %v\n", cookies)
@@ -81,9 +52,20 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		fmt.Printf("protected middleware %v, %v, %v\n", claims["id"], claims["exp"], refreshTokenCookie)
+		// second part is token
+		accessTokenString := authHeaderParts[1]
+		refreshTokenString := refreshTokenCookie.Value
 
-		// todo: common func to read token (must return claims)
+		newAccessToken, tokenValidationError := mjwt.ValidateToken(accessTokenString, refreshTokenString)
+
+		if tokenValidationError != nil {
+			utils.MakeErrorResponse[any](w, 401, nil, tokenValidationError)
+			return
+		}
+
+		if accessTokenString != newAccessToken {
+			w.Header().Set("AccessToken", newAccessToken)
+		}
 
 		next.ServeHTTP(w, r)
 	})
