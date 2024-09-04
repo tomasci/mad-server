@@ -1,4 +1,4 @@
-package utils
+package response
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ type Response[DataType interface{}] struct {
 	Data    DataType `json:"data,omitempty"`
 }
 
-func MakeResponse[DataType interface{}](w http.ResponseWriter, status int, data DataType) {
+func Success[DataType interface{}](w http.ResponseWriter, status int, data DataType) {
 	response := Response[DataType]{
 		Status:  status,
 		Error:   nil,
@@ -24,7 +24,7 @@ func MakeResponse[DataType interface{}](w http.ResponseWriter, status int, data 
 	json.NewEncoder(w).Encode(response)
 }
 
-func MakeErrorResponse[DataType interface{}](w http.ResponseWriter, status int, data DataType, err error) {
+func Error[DataType interface{}](w http.ResponseWriter, status int, data DataType, err error) {
 	error := true
 	errorMsg := err.Error()
 

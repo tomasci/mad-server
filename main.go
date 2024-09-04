@@ -12,7 +12,7 @@ import (
 	"log"
 	"mad_backend_v1/app_middlewares"
 	"mad_backend_v1/users"
-	"mad_backend_v1/utils"
+	"mad_backend_v1/utils/response"
 	"net/http"
 	"net/url"
 	"os"
@@ -64,11 +64,11 @@ func main() {
 	r.Use(app_middlewares.DBMiddleware(db))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		utils.MakeErrorResponse[any](w, 404, nil, errors.New("route_does_not_exist"))
+		response.Error[any](w, 404, nil, errors.New("route_does_not_exist"))
 	})
 
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		utils.MakeErrorResponse[any](w, 405, nil, errors.New("route_method_not_allowed"))
+		response.Error[any](w, 405, nil, errors.New("route_method_not_allowed"))
 	})
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +77,7 @@ func main() {
 			Time:   time.Now().UnixMilli(),
 		}
 
-		utils.MakeResponse[InfoResponse](w, 200, infoResponse)
+		response.Success[InfoResponse](w, 200, infoResponse)
 	})
 
 	apiRouter := chi.NewRouter()

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"gorm.io/gorm"
-	"mad_backend_v1/utils"
+	"mad_backend_v1/utils/response"
 	"net/http"
 )
 
@@ -16,7 +16,7 @@ func DBMiddleware(db *gorm.DB) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			if db == nil {
-				utils.MakeErrorResponse[any](writer, 500, nil, errors.New("database_connection_not_found"))
+				response.Error[any](writer, 500, nil, errors.New("database_connection_not_found"))
 				return
 			}
 

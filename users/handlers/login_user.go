@@ -5,10 +5,10 @@ import (
 	"gorm.io/gorm"
 	"mad_backend_v1/app_middlewares"
 	"mad_backend_v1/models"
-	"mad_backend_v1/utils"
 	"mad_backend_v1/utils/crypto"
 	"mad_backend_v1/utils/database"
 	"mad_backend_v1/utils/jwt"
+	"mad_backend_v1/utils/response"
 	"mad_backend_v1/utils/validation"
 	"net/http"
 )
@@ -102,10 +102,10 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	if status == 200 {
 		_, refreshTokenExpTime := jwt.ExpireInMonths(3)
 		jwt.SetRefreshTokenCookie(w, refreshToken, refreshTokenExpTime)
-		utils.MakeResponse[LoginResponse](w, status, LoginResponse{Token: accessToken})
+		response.Success[LoginResponse](w, status, LoginResponse{Token: accessToken})
 		return
 	} else {
-		utils.MakeErrorResponse[any](w, status, nil, err)
+		response.Error[any](w, status, nil, err)
 		return
 	}
 }

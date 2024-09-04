@@ -6,9 +6,9 @@ import (
 	"gorm.io/gorm"
 	"mad_backend_v1/app_middlewares"
 	"mad_backend_v1/models"
-	"mad_backend_v1/utils"
 	"mad_backend_v1/utils/crypto"
 	"mad_backend_v1/utils/database"
+	"mad_backend_v1/utils/response"
 	"net/http"
 )
 
@@ -58,10 +58,10 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	// trying to create user, returning error if not created
 	_, err := createUser(db, body)
 	if err != nil {
-		utils.MakeErrorResponse[any](w, 500, nil, err)
+		response.Error[any](w, 500, nil, err)
 		return
 	}
 
-	utils.MakeResponse[any](w, 200, nil)
+	response.Success[any](w, 200, nil)
 	return
 }

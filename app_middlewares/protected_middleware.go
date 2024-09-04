@@ -3,8 +3,8 @@ package app_middlewares
 import (
 	"errors"
 	"fmt"
-	"mad_backend_v1/utils"
 	mjwt "mad_backend_v1/utils/jwt"
+	"mad_backend_v1/utils/response"
 	"net/http"
 	"strings"
 	"time"
@@ -21,7 +21,7 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 		// check if it exists
 		if db == nil {
 			//http.Error(w, "database_connection_not_found", http.StatusInternalServerError)
-			utils.MakeErrorResponse[any](w, 500, nil, errors.New("database_connection_not_found"))
+			response.Error[any](w, 500, nil, errors.New("database_connection_not_found"))
 			return
 		}
 
@@ -36,7 +36,7 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 		if len(authHeaderParts) != 2 {
 			fmt.Printf("authHeaderParts condiiton", len(authHeaderParts))
 			//http.Error(w, "invalid_authorization_header", http.StatusUnauthorized)
-			utils.MakeErrorResponse[any](w, 400, nil, errors.New("invalid_authorization_header"))
+			response.Error[any](w, 400, nil, errors.New("invalid_authorization_header"))
 			return
 		}
 
@@ -48,7 +48,7 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 		if cookieErr != nil {
 			fmt.Printf("client has no cookies %v\n", cookieErr)
 			//http.Error(w, "empty_cookies", http.StatusUnauthorized)
-			utils.MakeErrorResponse[any](w, 400, nil, errors.New("empty_cookies"))
+			response.Error[any](w, 400, nil, errors.New("empty_cookies"))
 			return
 		}
 
@@ -59,7 +59,7 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 		newAccessToken, tokenValidationError := mjwt.ValidateToken(accessTokenString, refreshTokenString)
 
 		if tokenValidationError != nil {
-			utils.MakeErrorResponse[any](w, 401, nil, tokenValidationError)
+			response.Error[any](w, 401, nil, tokenValidationError)
 			return
 		}
 

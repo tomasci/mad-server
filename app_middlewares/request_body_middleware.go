@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/go-playground/validator/v10"
-	"mad_backend_v1/utils"
+	"mad_backend_v1/utils/response"
 	"mad_backend_v1/utils/validation"
 	"net/http"
 )
@@ -35,14 +35,14 @@ func RequestBodyMiddleware[T any]() func(next http.Handler) http.Handler {
 			var body T
 
 			if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
-				utils.MakeErrorResponse[any](writer, 400, nil, errors.New("invalid_request_body"))
+				response.Error[any](writer, 400, nil, errors.New("invalid_request_body"))
 				return
 			}
 
 			// default validation
 			validationErrors := validateStruct(body)
 			if len(validationErrors) > 0 {
-				utils.MakeErrorResponse(writer, 400, validationErrors, errors.New("validation_failed"))
+				response.Error(writer, 400, validationErrors, errors.New("validation_failed"))
 				return
 			}
 
@@ -50,7 +50,7 @@ func RequestBodyMiddleware[T any]() func(next http.Handler) http.Handler {
 			if additionalValidator, ok := any(body).(validation.Validator); ok {
 				validationErrors := additionalValidator.Validate()
 				if len(validationErrors) > 0 {
-					utils.MakeErrorResponse(writer, 400, validationErrors, errors.New("validation_failed"))
+					response.Error(writer, 400, validationErrors, errors.New("validation_failed"))
 					return
 				}
 			}
