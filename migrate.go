@@ -9,16 +9,22 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"net/url"
+	"os"
 	"time"
 )
 
 func main() {
 	// connecting to database
+	postgresHost := os.Getenv("POSTGRES_HOST")
+	postgresDb := os.Getenv("POSTGRES_DB")
+	postgresUser := os.Getenv("POSTGRES_USER")
+	postgresPassword := os.Getenv("POSTGRES_PASSWORD")
+
 	dsn := url.URL{
 		Scheme: "postgres",
-		Host:   "localhost:5432",
-		Path:   "altstore_v1",
-		User:   url.UserPassword("postgres", ""),
+		Host:   postgresHost,
+		Path:   postgresDb,
+		User:   url.UserPassword(postgresUser, postgresPassword),
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn.String()), &gorm.Config{
