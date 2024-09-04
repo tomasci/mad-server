@@ -1,0 +1,30 @@
+meta {
+  name: User Protected Test
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:1314/api/v1/users/private
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxNDI1MTYsImlkIjoiYmUzY2UyYmUtOGY2NC00MTVhLTlmMmQtMmQ5YjQ2ZjRkZTk4In0.FS-r81mv_DenliZE02aKDruz_FL-PRVtpYJDuKd2Ptc
+}
+
+body:json {
+  {
+    "username": "tomasci",
+    "password": "test"
+  }
+}
+
+script:pre-request {
+  const cookie = bru.getVar("cookie");
+  
+  if(cookie) {
+    req.setHeader("Cookie", cookie)
+  }
+}
