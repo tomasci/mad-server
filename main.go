@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -12,15 +12,16 @@ import (
 	"log"
 	"mad_backend_v1/app_middlewares"
 	"mad_backend_v1/users"
+	"mad_backend_v1/utils"
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 )
 
-type Response struct {
-	Data   interface{} `json:"data"`
-	Status int         `json:"status"`
-	Error  string      `json:"error,omitempty"`
+type InfoResponse struct {
+	Server string `json:"server"`
+	Time   int64  `json:"time"`
 }
 
 func main() {
@@ -52,11 +53,6 @@ func main() {
 		fmt.Printf("failed to connect database: %v", err)
 	}
 
-	// Auto-migrate the schema
-	//    if err := db.AutoMigrate(&models.User{}); err != nil {
-	//        fmt.Printf("failed to migrate database: %v", err)
-	//    }
-
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -68,42 +64,20 @@ func main() {
 	r.Use(app_middlewares.DBMiddleware(db))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		response := Response{
-			Data:   nil,
-			Status: 404,
-			Error:  "route_does_not_exist",
-		}
-		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(response)
+		utils.MakeErrorResponse[any](w, 404, nil, errors.New("route_does_not_exist"))
 	})
 
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		response := Response{
-			Data:   nil,
-			Status: 405,
-			Error:  "route_method_not_allowed",
-		}
-		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(response)
+		utils.MakeErrorResponse[any](w, 405, nil, errors.New("route_method_not_allowed"))
 	})
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		response := Response{
-			Data:   "MAD server",
-			Status: 200,
+		infoResponse := InfoResponse{
+			Server: "MAD server",
+			Time:   time.Now().UnixMilli(),
 		}
 
-		err := json.NewEncoder(w).Encode(response)
-		if err != nil {
-			fmt.Printf("error happened when encoding response: %s\n", err)
-			return
-		}
-
-		//        _, err := w.Write([]byte("Hello, World!"))
-		//        if err != nil {
-		//            fmt.Printf("error happened when writing response: %s", err)
-		//            return
-		//        }
+		utils.MakeResponse[InfoResponse](w, 200, infoResponse)
 	})
 
 	apiRouter := chi.NewRouter()
