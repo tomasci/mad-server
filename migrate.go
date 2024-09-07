@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -14,6 +15,11 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
 	// connecting to database
 	postgresHost := os.Getenv("POSTGRES_HOST")
 	postgresDb := os.Getenv("POSTGRES_DB")
@@ -66,6 +72,22 @@ func main() {
 		//                return tx.Migrator().RenameColumn("users", "username", "name")
 		//            },
 		//        },
+		{
+			ID: "create_todos_table",
+			Migrate: func(tx *gorm.DB) error {
+				type todos struct {
+					ID        uuid.UUID `gorm:"type:uuid;primaryKey;uniqueIndex" json:"id"`
+					CreatedAt time.Time `json:"created_at"`
+					UpdatedAt time.Time `json:"updated_at"`
+					DeletedAt time.Time `gorm:"index" json:"deleted_at"`
+				}
+
+				return tx.Migrator().CreateTable(&todos{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable("todos")
+			},
+		},
 	})
 
 	if err = m.Migrate(); err != nil {
