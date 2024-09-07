@@ -10,9 +10,9 @@ import (
 	"net/http"
 )
 
-type requestBodyKey int
+type TBodyKey int
 
-const bodyKey requestBodyKey = iota
+const bodyKey TBodyKey = iota
 
 func validateStruct[T any](data T) validation.ResultValidationErrors {
 	result := make(validation.ResultValidationErrors)

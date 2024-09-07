@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-type key string
+type TDBKey string
 
-const dbKey key = "db"
+const dbKey TDBKey = "db"
 
 func DBMiddleware(db *gorm.DB) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

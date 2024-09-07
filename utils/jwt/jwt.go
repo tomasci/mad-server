@@ -86,19 +86,19 @@ func ParseToken(token string) (*jwt.Token, error) {
 	return parsedToken, err
 }
 
-func ValidateToken(rawAccessToken string, rawRefreshToken string) (string, error) {
+func ValidateToken(rawAccessToken string, rawRefreshToken string) (string, jwt.MapClaims, error) {
 	_, accessTokenErr := ParseToken(rawAccessToken)
 	refreshToken, refreshTokenErr := ParseToken(rawRefreshToken)
 
 	// if refresh token is not valid, user must log in again
 	if refreshTokenErr != nil {
-		return "", errors.New("token_refresh_token_invalid_token")
+		return "", nil, errors.New("token_refresh_token_invalid_token")
 	}
 
 	// get refresh token claims
 	refreshTokenClaims, ok := refreshToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", errors.New("token_refresh_token_invalid_claims")
+		return "", nil, errors.New("token_refresh_token_invalid_claims")
 	}
 
 	// if access token is not valid
@@ -111,13 +111,13 @@ func ValidateToken(rawAccessToken string, rawRefreshToken string) (string, error
 
 		// if failed - error
 		if newAccessTokenErr != nil {
-			return "", errors.New("token_access_token_create_failed")
+			return "", nil, errors.New("token_access_token_create_failed")
 		}
 
 		// return new token
-		return newAccessTokenString, nil
+		return newAccessTokenString, refreshTokenClaims, nil
 	}
 
 	// if everything is fine - return old token
-	return rawAccessToken, nil
+	return rawAccessToken, refreshTokenClaims, nil
 }

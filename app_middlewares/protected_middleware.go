@@ -1,14 +1,22 @@
 package app_middlewares
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
+	"mad_backend_v1/models"
+	"mad_backend_v1/utils/database"
 	mjwt "mad_backend_v1/utils/jwt"
 	"mad_backend_v1/utils/response"
 	"net/http"
 	"strings"
 	"time"
 )
+
+type TUserKey string
+
+const userKey TUserKey = "user"
 
 func ProtectedMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +64,7 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 		accessTokenString := authHeaderParts[1]
 		refreshTokenString := refreshTokenCookie.Value
 
-		newAccessToken, tokenValidationError := mjwt.ValidateToken(accessTokenString, refreshTokenString)
+		newAccessToken, claims, tokenValidationError := mjwt.ValidateToken(accessTokenString, refreshTokenString)
 
 		if tokenValidationError != nil {
 			response.Error[any](w, 401, nil, tokenValidationError)
@@ -67,6 +75,33 @@ func ProtectedMiddleware(next http.Handler) http.Handler {
 			w.Header().Set("AccessToken", newAccessToken)
 		}
 
-		next.ServeHTTP(w, r)
+		// todo: select user data from db
+		userId := claims["id"]
+		var user models.User
+		userSelectResult := db.First(&user, "id = ?", userId)
+
+		if userSelectResult.Error != nil {
+			if errors.Is(userSelectResult.Error, gorm.ErrRecordNotFound) {
+				response.Error[any](w, 500, nil, errors.New("protected_middleware_user_select_failed"))
+				return
+			}
+
+			// handling postgres errors
+			pgError := database.ErrorHandler(userSelectResult.Error)
+			if pgError != nil {
+				response.Error[any](w, 500, nil, pgError)
+			}
+		}
+
+		ctx := context.WithValue(r.Context(), userKey, user)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func GetUserFromContext(ctx context.Context) *models.User {
+	user, ok := ctx.Value(userKey).(models.User)
+	if !ok {
+		return nil
+	}
+	return &user
 }

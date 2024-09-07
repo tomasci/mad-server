@@ -13,7 +13,7 @@ import (
 )
 
 type CreateUserRequest struct {
-	Username string `json:"username" validate:"required,min=1"`
+	Username string `json:"username" validate:"required,min=2"`
 	Password string `json:"password" validate:"required,min=4"`
 	Email    string `json:"email" validate:"required,min=1"`
 }
@@ -58,10 +58,10 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	// trying to create user, returning error if not created
 	_, err := createUser(db, body)
 	if err != nil {
-		response.Error[any](w, 500, nil, err)
+		response.Error[any](w, 409, nil, err)
 		return
 	}
 
-	response.Success[any](w, 200, nil)
+	response.Success[any](w, 201, nil)
 	return
 }

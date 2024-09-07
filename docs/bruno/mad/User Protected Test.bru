@@ -6,19 +6,12 @@ meta {
 
 post {
   url: http://localhost:1314/api/v1/users/private
-  body: json
+  body: none
   auth: none
 }
 
 headers {
-  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU0ODU2NjYsImlkIjoiYmUzY2UyYmUtOGY2NC00MTVhLTlmMmQtMmQ5YjQ2ZjRkZTk4In0.ul2B__VGAb7tg2CdaN-854sh4j3ls1x_mHl8Wd-l1U4
-}
-
-body:json {
-  {
-    "username": "tomasci",
-    "password": "test"
-  }
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjU3MzU5MDEsImlkIjoiNmQ5MWYzOTktYWNlNy00ZGE1LTgwZjYtYzI5Mjk2ODhkZjcyIn0.SpYaiXP2WpcTgpOTCfPdMS9u4MxNCkNgxY7pxnNtK6k
 }
 
 script:pre-request {
