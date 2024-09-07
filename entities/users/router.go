@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"mad_backend_v1/app_middlewares"
-	"mad_backend_v1/users/handlers"
+	handlers2 "mad_backend_v1/entities/users/handlers"
 	"net/http"
 )
 
 func GetRouter(api chi.Router) {
 	usersRouter := chi.NewRouter()
-	usersRouter.With(app_middlewares.RequestBodyMiddleware[handlers.LoginRequest]()).Post("/login", handlers.LoginUserHandler)
-	usersRouter.With(app_middlewares.RequestBodyMiddleware[handlers.CreateUserRequest]()).Post("/create", handlers.CreateUserHandler)
+	usersRouter.With(app_middlewares.RequestBodyMiddleware[handlers2.LoginRequest]()).Post("/login", handlers2.LoginUserHandler)
+	usersRouter.With(app_middlewares.RequestBodyMiddleware[handlers2.CreateUserRequest]()).Post("/create", handlers2.CreateUserHandler)
 	usersRouter.With(app_middlewares.ProtectedMiddleware).Post("/private", func(w http.ResponseWriter, r *http.Request) {
 		// just testing
 		userCtx := app_middlewares.GetUserFromContext(r.Context())

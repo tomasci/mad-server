@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"mad_backend_v1/app_middlewares"
-	"mad_backend_v1/users"
+	"mad_backend_v1/entities/users"
 	"mad_backend_v1/utils/response"
 	"net/http"
 	"net/url"
