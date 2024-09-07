@@ -10,6 +10,7 @@ import (
 
 func GetRouter(api chi.Router) {
 	usersRouter := chi.NewRouter()
+
 	usersRouter.With(app_middlewares.RequestBodyMiddleware[handlers2.LoginRequest]()).Post("/login", handlers2.LoginUserHandler)
 	usersRouter.With(app_middlewares.RequestBodyMiddleware[handlers2.CreateUserRequest]()).Post("/create", handlers2.CreateUserHandler)
 	usersRouter.With(app_middlewares.ProtectedMiddleware).Post("/private", func(w http.ResponseWriter, r *http.Request) {
@@ -21,5 +22,6 @@ func GetRouter(api chi.Router) {
 		}
 		w.Write([]byte(""))
 	})
+
 	api.Mount("/users", usersRouter)
 }

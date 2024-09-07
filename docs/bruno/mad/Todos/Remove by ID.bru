@@ -1,0 +1,23 @@
+meta {
+  name: Remove by ID
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{host}}/api/v1/todos/remove/2
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+script:pre-request {
+  const cookie = bru.getVar("cookie");
+  
+  if(cookie) {
+    req.setHeader("Cookie", cookie)
+  }
+}

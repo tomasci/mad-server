@@ -1,0 +1,23 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{host}}/api/v1/todos/create
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+script:pre-request {
+  const cookie = bru.getVar("cookie");
+  
+  if(cookie) {
+    req.setHeader("Cookie", cookie)
+  }
+}

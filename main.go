@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"mad_backend_v1/app_middlewares"
+	"mad_backend_v1/entities/todos"
 	"mad_backend_v1/entities/users"
 	"mad_backend_v1/utils/response"
 	"net/http"
@@ -92,6 +93,7 @@ func main() {
 	})
 
 	users.GetRouter(v1Router)
+	todos.GetRouter(v1Router)
 
 	apiRouter.Mount("/v1", v1Router)
 	r.Mount("/api", apiRouter)

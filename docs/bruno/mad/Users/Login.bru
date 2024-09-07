@@ -18,9 +18,14 @@ body:json {
 }
 
 script:post-response {
+  // cookies
   const cookies = res.getHeader('set-cookie');
   
   if(cookies) {
     bru.setVar("cookie", cookies.join('; '));
   }
+  
+  // access token
+  const r = res.getBody()
+  bru.setVar("token", r.data.token)
 }

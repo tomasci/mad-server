@@ -1,0 +1,23 @@
+meta {
+  name: Update by ID
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{host}}/api/v1/todos/update/1
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+script:pre-request {
+  const cookie = bru.getVar("cookie");
+  
+  if(cookie) {
+    req.setHeader("Cookie", cookie)
+  }
+}
