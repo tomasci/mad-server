@@ -88,6 +88,20 @@ func main() {
 				return tx.Migrator().DropTable("todos")
 			},
 		},
+		{
+			ID: "create_users_todos_table",
+			Migrate: func(tx *gorm.DB) error {
+				type usersTodos struct {
+					UserID    uuid.UUID `gorm:"type:uuid;primaryKey" json:"user_id"`
+					TodoID    uuid.UUID `gorm:"type:uuid;primaryKey" json:"todo_id"`
+					CreatedAt time.Time `json:"created_at"`
+				}
+				return tx.Migrator().CreateTable(&usersTodos{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable("users_todos")
+			},
+		},
 	})
 
 	if err = m.Migrate(); err != nil {
