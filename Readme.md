@@ -5,30 +5,31 @@ All commands must be executed in project root folder.
 ## Before start
 
 1. Copy .env.example as .env and update it
-2. Run `bash ./scripts/migrate-up.sh` – this will run migration tool
+2. Use project environment, run: `source ./shell.sh` - it will allow you to use all pre-defined aliases, env variable etc.
+2. Run `mad:migrate:up` – this will run migration tool and update database
 
 ## Dev Mode
 
 It will build and run server automatically when you change code.
 
-`bash ./scripts/dev.sh`
+`mad:dev`
 
 ## Build
 
-`bash ./scripts/build.sh`
+`mad:build`
 
 ## Run build
 
-`bash ./scripts/run.sh`
+`mad:run`
 
 ## Migrations
 
 This project uses goose. Predefined scripts are: 
 
-Up: `bash ./scripts/migrate-up.sh`
+Up: `mad:migrate:up`
 
-Down: `bash ./scripts/migrate-down.sh`
+Down: `mad:migrate:down`
 
-Create: `bash ./scripts/migrate-create.sh`
+Create: `mad:migrate:create`
 
 Other command can be executed by calling directly.

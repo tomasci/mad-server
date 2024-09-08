@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Cleanup"
 rm -rf ./build/server
