@@ -48,7 +48,7 @@ func main() {
 			ID: "create_users_table",
 			Migrate: func(tx *gorm.DB) error {
 				type users struct {
-					ID        uuid.UUID `gorm:"type:uuid;primaryKey;uniqueIndex" json:"id"`
+					ID        uuid.UUID `gorm:"type:uuid;primaryKey;uniqueIndex;default:uuid_generate_v4()" json:"id"`
 					Username  string    `gorm:"unique;not null" json:"username"`
 					Password  string    `json:"password"`
 					Email     string    `gorm:"unique;not null" json:"email"`
@@ -76,7 +76,7 @@ func main() {
 			ID: "create_todos_table",
 			Migrate: func(tx *gorm.DB) error {
 				type todos struct {
-					ID        uuid.UUID `gorm:"type:uuid;primaryKey;uniqueIndex" json:"id"`
+					ID        uuid.UUID `gorm:"type:uuid;primaryKey;uniqueIndex;default:uuid_generate_v4()" json:"id"`
 					CreatedAt time.Time `json:"created_at"`
 					UpdatedAt time.Time `json:"updated_at"`
 					DeletedAt time.Time `gorm:"index" json:"deleted_at"`
@@ -96,10 +96,33 @@ func main() {
 					TodoID    uuid.UUID `gorm:"type:uuid;primaryKey" json:"todo_id"`
 					CreatedAt time.Time `json:"created_at"`
 				}
+
 				return tx.Migrator().CreateTable(&usersTodos{})
+				//if err := tx.Migrator().CreateTable(&usersTodos{}); err != nil {
+				//	return err
+				//}
+
+				//return tx.Model(&usersTodos{}).For
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return tx.Migrator().DropTable("users_todos")
+			},
+		},
+		{
+			ID: "todos_add_field_title",
+			Migrate: func(tx *gorm.DB) error {
+				type todos struct {
+					Title string `gorm:"type:string" json:"title"`
+				}
+
+				return tx.Migrator().AddColumn(&todos{}, "Title")
+			},
+			Rollback: func(tx *gorm.DB) error {
+				type todos struct {
+					Title string `gorm:"type:string" json:"title"`
+				}
+
+				return tx.Migrator().DropColumn(&todos{}, "Title")
 			},
 		},
 	})

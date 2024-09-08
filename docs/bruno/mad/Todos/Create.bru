@@ -6,12 +6,18 @@ meta {
 
 post {
   url: {{host}}/api/v1/todos/create
-  body: none
+  body: json
   auth: none
 }
 
 headers {
   Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "title": "1"
+  }
 }
 
 script:pre-request {

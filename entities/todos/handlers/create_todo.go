@@ -10,11 +10,15 @@ import (
 	"net/http"
 )
 
-func createTodo(db *gorm.DB, userId uuid.UUID) (*models.Todo, error) {
+type CreateTodoRequest struct {
+	Title string `json:"title" validate:"required,min=1"`
+}
+
+func createTodo(db *gorm.DB, data CreateTodoRequest, userId uuid.UUID) (*models.Todo, error) {
 	tx := db.Begin()
 
 	// create todo
-	todo := models.Todo{ID: uuid.New()}
+	todo := models.Todo{ID: uuid.New(), Title: data.Title}
 	result := tx.Create(&todo)
 	if result.Error != nil {
 		tx.Rollback()
@@ -44,9 +48,10 @@ func createTodo(db *gorm.DB, userId uuid.UUID) (*models.Todo, error) {
 
 func CreateTodoHandler(writer http.ResponseWriter, request *http.Request) {
 	db := app_middlewares.GetDBFromContext(request.Context())
+	body := app_middlewares.GetRequestBody[CreateTodoRequest](request.Context())
 	userCtx := app_middlewares.GetUserFromContext(request.Context())
 
-	todo, err := createTodo(db, userCtx.ID)
+	todo, err := createTodo(db, body, userCtx.ID)
 	if err != nil {
 		response.Error[any](writer, 500, nil, err)
 		return
