@@ -12,7 +12,7 @@ func GetRouter(api chi.Router) {
 
 	todosRouter.With(app_middlewares.ProtectedMiddleware).Get("/all", handlers.AllTodosHandler)
 	todosRouter.With(app_middlewares.ProtectedMiddleware).With(app_middlewares.RequestBodyMiddleware[handlers.CreateTodoRequest]()).Post("/create", handlers.CreateTodoHandler)
-	todosRouter.With(app_middlewares.ProtectedMiddleware).Put("/update/{todoId}", func(writer http.ResponseWriter, request *http.Request) {
+	todosRouter.With(app_middlewares.ProtectedMiddleware).With(app_middlewares.RequestBodyMiddleware[handlers.UpdateTodoRequest]()).Put("/update/{todoId}", func(writer http.ResponseWriter, request *http.Request) {
 		todoIdParam := chi.URLParam(request, "todoId")
 		handlers.UpdateTodoHandler(writer, request, todoIdParam)
 	})
