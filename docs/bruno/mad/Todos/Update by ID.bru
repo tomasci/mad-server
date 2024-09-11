@@ -5,13 +5,19 @@ meta {
 }
 
 put {
-  url: {{host}}/api/v1/todos/update/1
-  body: none
+  url: {{host}}/api/v1/todos/update/6d19a421-ba0f-4692-9edf-84f4cb66932a
+  body: json
   auth: none
 }
 
 headers {
   Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "title": "New note text"
+  }
 }
 
 script:pre-request {

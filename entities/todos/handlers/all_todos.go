@@ -8,12 +8,13 @@ import (
 	"mad_backend_v1/utils/database"
 	"mad_backend_v1/utils/response"
 	"net/http"
+	"time"
 )
 
 func allTodos(db *gorm.DB, userId uuid.UUID) ([]models.Todo, error) {
 	var todos []models.Todo
 
-	result := db.Table("todos").Joins("join users_todos on users_todos.todo_id = todos.id").Where("users_todos.user_id = ?", userId).Order("todos.created_at DESC").Scan(&todos)
+	result := db.Table("todos").Joins("join users_todos on users_todos.todo_id = todos.id").Where("users_todos.user_id = ? and (deleted_at IS NULL or deleted_at = ?)", userId, time.Time{}).Order("todos.created_at DESC").Scan(&todos)
 	if result.Error != nil {
 		pgError := database.ErrorHandler(result.Error)
 		if pgError != nil {
