@@ -50,14 +50,10 @@ func LoginUser(db *gorm.DB, loginData LoginRequest) (string, string, int, error)
 
 	// handle gorm errors
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return "", "", 401, errors.New("wrong_username_or_password") // do not return "user_not_found", they don't need to know about it
-		}
-
 		// handling postgres errors
 		pgError := database.ErrorHandler(result.Error)
 		if pgError != nil {
-			return "", "", 500, pgError
+			return "", "", 401, pgError
 		}
 	}
 

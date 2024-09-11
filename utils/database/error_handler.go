@@ -4,11 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgconn"
+	"gorm.io/gorm"
 )
 
 func ErrorHandler(err error) error {
 	// print log in case some errors is not handled and returned as "unknown"
 	fmt.Printf("database ErrorHandler: %v, type: %T\n", err, err.Error)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errors.New("not_found")
+	}
 
 	// try to assert error as PgError
 	var pgErr *pgconn.PgError

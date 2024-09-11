@@ -12,20 +12,24 @@ post {
 
 body:json {
   {
-    "username": "tomasci",
+    "username": "tomasci123",
     "password": "1q2w3easdzxc"
   }
 }
 
 script:post-response {
-  // cookies
-  const cookies = res.getHeader('set-cookie');
+  try {
+    // cookies
+    const cookies = res.getHeader('set-cookie');
   
-  if(cookies) {
-    bru.setVar("cookie", cookies.join('; '));
+    if(cookies) {
+      bru.setVar("cookie", cookies.join('; '));
+    }
+  
+    // access token
+    const r = res.getBody()
+    bru.setVar("token", r.data.token)
+  } catch (e) {
+    console.log(e)
   }
-  
-  // access token
-  const r = res.getBody()
-  bru.setVar("token", r.data.token)
 }
