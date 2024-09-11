@@ -8,6 +8,7 @@ import (
 	"mad_backend_v1/utils/database"
 	"mad_backend_v1/utils/response"
 	"net/http"
+	"time"
 )
 
 type UpdateTodoRequest struct {
@@ -22,7 +23,7 @@ func updateTodo(db *gorm.DB, data UpdateTodoRequest, todoId string, userId uuid.
 	//result := tx.Joins("JOIN users_todos on users_todos.todo_id = todos.id").Where("todos.id = ? and users_todos.user_id = ?", todoId, userId).First(&todo)
 	// at this point I'm starting to think about switching from gorm to something else, too much magic...
 	// of course I have another variant below, but it wasn't like this at first
-	result := tx.Table("todos").Joins("JOIN users_todos on users_todos.todo_id = todos.id").Where("todos.id = ? and users_todos.user_id = ?", todoId, userId).First(&todo)
+	result := tx.Table("todos").Joins("JOIN users_todos on users_todos.todo_id = todos.id").Where("todos.id = ? and users_todos.user_id = ? and (deleted_at IS NULL or deleted_at = ?)", todoId, userId, time.Time{}).First(&todo)
 
 	if result.Error != nil {
 		pgError := database.ErrorHandler(result.Error)

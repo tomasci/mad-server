@@ -18,7 +18,7 @@ func removeTodo(db *gorm.DB, todoId string, userId uuid.UUID) (bool, error) {
 	tx := db.Begin()
 
 	var todo models.Todo
-	result := tx.Table("todos").Joins("JOIN users_todos on users_todos.todo_id = todos.id").Where("todos.id = ? and users_todos.user_id = ?", todoId, userId).First(&todo)
+	result := tx.Table("todos").Joins("JOIN users_todos on users_todos.todo_id = todos.id").Where("todos.id = ? and users_todos.user_id = ? and (deleted_at IS NULL or deleted_at = ?)", todoId, userId, time.Time{}).First(&todo)
 
 	if result.Error != nil {
 		pgError := database.ErrorHandler(result.Error)
