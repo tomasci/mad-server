@@ -1,3 +1,4 @@
 build
 .env
 .idea
+_client/node_modules
