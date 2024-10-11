@@ -1,0 +1,5 @@
+const xfetch = () => {
+    //
+}
+
+export {xfetch}
