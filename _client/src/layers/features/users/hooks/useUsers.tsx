@@ -6,8 +6,8 @@ import {
   localUserStatusAtom,
   localUserUpdaterAtom,
 } from "../store.ts";
-import { useNetwork } from "../../../network/hooks/useNetwork.tsx";
-import { useDebug } from "../../debug/hooks/useDebug.tsx";
+import { useDebug } from "@/src/layers/features/debug/hooks/useDebug.tsx";
+import { useNetwork } from "@/src/layers/network/hooks/useNetwork.tsx";
 
 const useUsers = () => {
   // props
@@ -29,6 +29,10 @@ const useUsers = () => {
       setLocalUser({
         username: input.username,
         email: input.email,
+      });
+
+      setLocalUser({
+        created_at: "123",
       });
     };
 

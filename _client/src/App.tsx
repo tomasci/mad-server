@@ -1,6 +1,6 @@
-import { useFeature1 } from "./layers/features/feature1/hooks/useFeature1.tsx";
 import { useLayoutEffect } from "react";
-import { useUsers } from "./layers/features/users/hooks/useUsers.tsx";
+import { useFeature1 } from "@/src/layers/features/feature1/hooks/useFeature1.tsx";
+import { useUsers } from "@/src/layers/features/users/hooks/useUsers.tsx";
 
 function App() {
   const { doSomething, something, somethingStatus } = useFeature1();

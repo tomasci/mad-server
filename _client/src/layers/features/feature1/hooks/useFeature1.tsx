@@ -4,7 +4,7 @@ import {
   feature1SomethingAtom,
   feature1SomethingRequestStatusAtom,
 } from "../store.ts";
-import { useNetwork } from "../../../network/hooks/useNetwork.tsx";
+import { useNetwork } from "@/src/layers/network/hooks/useNetwork.tsx";
 
 const useFeature1 = () => {
   // props
