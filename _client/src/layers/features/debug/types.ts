@@ -1,5 +1,5 @@
 interface UseDebug_Input {
-  prefix: string;
+  prefix?: string;
 }
 
 enum ConsoleStyles {
@@ -10,8 +10,9 @@ enum ConsoleStyles {
   yellow = "color: yellow",
   white = "color: white",
   highlightedYellow = "background: yellow",
-  highlightedGreen = "background: green",
   highlightedRed = "background: red",
+  highlightedGreen = "background: green",
+  highlightedBlue = "background: blue",
 }
 
 export type { UseDebug_Input };

@@ -5,9 +5,11 @@ import {
   feature1SomethingRequestStatusAtom,
 } from "../store.ts";
 import { useNetwork } from "@/src/layers/network/hooks/useNetwork.tsx";
+import { useDebug } from "@/src/layers/features/debug/hooks/useDebug.tsx";
 
 const useFeature1 = () => {
   // props
+  const debug = useDebug({});
   const { query, mutation } = useNetwork();
 
   // state
@@ -31,7 +33,7 @@ const useFeature1 = () => {
 
     const updateLocalData = async () => {
       setSomething(`I started here! > ${new Date().getTime()}`);
-      console.log("useFeature1 doSomething updateLocalData");
+      debug.log("useFeature1 doSomething updateLocalData");
       return;
     };
 
@@ -39,11 +41,11 @@ const useFeature1 = () => {
       try {
         const result = await query();
         setSomething((prev) => {
-          console.log("doSomething perform", result, prev);
+          debug.log("doSomething perform", result, prev);
           return prev; // Keeping previous value just to log the right thing
         });
       } catch (error) {
-        console.error("Error in perform: ", error);
+        debug.error("Error in perform: ", error);
       }
     };
 

@@ -18,7 +18,7 @@ type CreateUserRequest struct {
 	Email    string `json:"email" validate:"required,min=1"`
 }
 
-func createUser(db *gorm.DB, data CreateUserRequest) (bool, error) {
+func createUser(db *gorm.DB, data CreateUserRequest) (*models.User, error) {
 	tx := db.Begin()
 
 	// hashing password
@@ -26,7 +26,7 @@ func createUser(db *gorm.DB, data CreateUserRequest) (bool, error) {
 	if err != nil {
 		//log.Fatal(err)
 		tx.Commit()
-		return false, errors.New("password_hash_create_failed")
+		return nil, errors.New("password_hash_create_failed")
 	}
 
 	// applying user data to user model
@@ -42,13 +42,13 @@ func createUser(db *gorm.DB, data CreateUserRequest) (bool, error) {
 		pgError := database.ErrorHandler(result.Error)
 		if pgError != nil {
 
-			return false, pgError
+			return nil, pgError
 		}
 	}
 
 	tx.Commit()
 
-	return true, nil
+	return &user, nil
 }
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,12 +56,12 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	db := app_middlewares.GetDBFromContext(r.Context())
 
 	// trying to create user, returning error if not created
-	_, err := createUser(db, body)
+	user, err := createUser(db, body)
 	if err != nil {
 		response.Error[any](w, 409, nil, err)
 		return
 	}
 
-	response.Success[any](w, 201, nil)
+	response.Success[*models.User](w, 201, user)
 	return
 }

@@ -3,12 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/go-chi/cors"
 	"log"
 	"mad_backend_v1/app_middlewares"
 	"mad_backend_v1/entities/todos"
@@ -18,6 +13,13 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type InfoResponse struct {
@@ -55,9 +57,23 @@ func main() {
 	}
 
 	r := chi.NewRouter()
+
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		//AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedHeaders:   []string{"*"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
+
 	//    r.Use(middleware.RealIP)
 	r.Use(middleware.AllowContentEncoding("deflate", "gzip"))
 	r.Use(middleware.AllowContentType("application/json"))
@@ -104,3 +120,35 @@ func main() {
 		return
 	}
 }
+
+//package main
+//
+//import (
+//	"github.com/go-chi/chi/v5"
+//	"net/http"
+//)
+//
+//func main() {
+//	r := chi.NewRouter()
+//
+//	// Basic CORS
+//	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+//	//r.Use(cors.Handler(cors.Options{
+//	//	// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+//	//	AllowedOrigins: []string{"https://*", "http://*"},
+//	//	// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+//	//	AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+//	//	//AllowedHeaders:     []string{"X-PINGOTHER", "Accept", "Authorization", "Content-Type", "X-CSRF-Token", "accept-language", "referer", "sec-ch-ua", "sec-ch-ua-mobile", "sec-ch-ua-platform", "user-agent"},
+//	//	AllowedHeaders: []string{"*"},
+//	//	//ExposedHeaders:     []string{"Link", },
+//	//	AllowCredentials: false,
+//	//	MaxAge:           300, // Maximum value not ignored by any of major browsers
+//	//	//OptionsPassthrough: true,
+//	//}))
+//
+//	r.Post("/api/v1/users/create", func(w http.ResponseWriter, r *http.Request) {
+//		w.Write([]byte("welcome"))
+//	})
+//
+//	http.ListenAndServe(":1314", r)
+//}
