@@ -1,7 +1,9 @@
 import { useAtom } from "jotai/index";
 import {
-  localUserAtom, localUserNetworkErrorAtom,
+  localUserAtom,
+  localUserNetworkErrorAtom,
   localUserStatusAtom,
+  localUserTokenAtom,
 } from "@/src/layers/features/users/store.ts";
 
 const useUser = () => {
@@ -11,12 +13,14 @@ const useUser = () => {
   // state
   const [localUser] = useAtom(localUserAtom);
   const [localUserStatus] = useAtom(localUserStatusAtom);
-  const [localUserNetworkError] = useAtom(localUserNetworkErrorAtom)
+  const [localUserNetworkError] = useAtom(localUserNetworkErrorAtom);
+  const [localUserToken] = useAtom(localUserTokenAtom);
 
   return {
     localUser,
     localUserStatus,
-    localUserNetworkError
+    localUserNetworkError,
+    localUserToken,
   };
 };
 

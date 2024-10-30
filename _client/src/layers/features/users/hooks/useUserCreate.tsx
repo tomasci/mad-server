@@ -1,6 +1,9 @@
 import { useCallback } from "react";
 import { useDebug } from "@/src/layers/features/debug/hooks/useDebug.tsx";
-import { User, User_Create_Input } from "@/src/layers/features/users/types.ts";
+import {
+  User_Create_Input,
+  User_Create_Response,
+} from "@/src/layers/features/users/types.ts";
 import { useNetwork } from "@/src/layers/network/hooks/useNetwork.tsx";
 import { useAtom } from "jotai/index";
 import {
@@ -8,6 +11,7 @@ import {
   localUserStatusAtom,
   localUserUpdaterAtom,
 } from "@/src/layers/features/users/store.ts";
+import { CommonError } from "@/src/layers/shared/types/CommonTypes.ts";
 
 const useUserCreate = () => {
   // props
@@ -22,12 +26,12 @@ const useUserCreate = () => {
   // functions
   const userCreate = useCallback(
     async (input: User_Create_Input) => {
-      debug.log("userCreate call")
+      debug.log("userCreate call");
 
       // first update all possible local states
       const updateLocalData = async () => {
         // reset error (from previous tries)
-        setError(null)
+        setError(null);
         // and set local user data (you already have some from input)
         setLocalUser({
           username: input.username,
@@ -42,7 +46,11 @@ const useUserCreate = () => {
 
         try {
           // mutate
-          const result = await mutation<never, User_Create_Input, User>(
+          const result = await mutation<
+            never,
+            User_Create_Input,
+            User_Create_Response
+          >(
             {
               code: "users-create",
             },
@@ -55,11 +63,11 @@ const useUserCreate = () => {
           // update state with response from BE
           setLocalUser(result.data);
         } catch (e: unknown) {
-          const err = e as {message: string}
+          const err = e as CommonError;
           // if error, clear local state
           setLocalUser(null);
           // and set error
-          setError(err.message)
+          setError(err.message);
         }
 
         // update loading status

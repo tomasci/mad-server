@@ -35,12 +35,13 @@ func (data LoginRequest) Validate() validation.ResultValidationErrors {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token string       `json:"token"`
+	User  *models.User `json:"user"`
 }
 
 // LoginUser is a function that accepts username and password,
 // selects user from database, validates hash and returns accessToken, refreshToken, status and error
-func LoginUser(db *gorm.DB, loginData LoginRequest) (string, string, int, error) {
+func LoginUser(db *gorm.DB, loginData LoginRequest) (string, string, *models.User, int, error) {
 	username := loginData.Username
 	password := loginData.Password
 
@@ -53,7 +54,7 @@ func LoginUser(db *gorm.DB, loginData LoginRequest) (string, string, int, error)
 		// handling postgres errors
 		pgError := database.ErrorHandler(result.Error)
 		if pgError != nil {
-			return "", "", 401, pgError
+			return "", "", nil, 401, pgError
 		}
 	}
 
@@ -61,7 +62,7 @@ func LoginUser(db *gorm.DB, loginData LoginRequest) (string, string, int, error)
 	passwordHash := user.Password
 	match, err := crypto.HashValidate(password, passwordHash)
 	if err != nil {
-		return "", "", 401, errors.New("wrong_username_or_password") // same as before, user doesn't need to know if it is wrong password or not
+		return "", "", nil, 401, errors.New("wrong_username_or_password") // same as before, user doesn't need to know if it is wrong password or not
 	}
 
 	if match {
@@ -72,7 +73,7 @@ func LoginUser(db *gorm.DB, loginData LoginRequest) (string, string, int, error)
 		accessTokenString, accessTokenErr := jwt.CreateJWTToken(accessTokenData, accessTokenExp)
 
 		if accessTokenErr != nil {
-			return "", "", 500, accessTokenErr
+			return "", "", nil, 500, accessTokenErr
 		}
 
 		// create refresh token (currently with the same data, so)
@@ -80,12 +81,12 @@ func LoginUser(db *gorm.DB, loginData LoginRequest) (string, string, int, error)
 		refreshTokenString, refreshTokenErr := jwt.CreateJWTToken(accessTokenData, refreshTokenExp)
 
 		if refreshTokenErr != nil {
-			return "", "", 500, refreshTokenErr
+			return "", "", nil, 500, refreshTokenErr
 		}
 
-		return accessTokenString, refreshTokenString, 200, nil
+		return accessTokenString, refreshTokenString, &user, 200, nil
 	} else {
-		return "", "", 401, errors.New("wrong_username_or_password") // same thing
+		return "", "", nil, 401, errors.New("wrong_username_or_password") // same thing
 	}
 }
 
@@ -93,12 +94,12 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	body := app_middlewares.GetRequestBody[LoginRequest](r.Context())
 	db := app_middlewares.GetDBFromContext(r.Context())
 
-	accessToken, refreshToken, status, err := LoginUser(db, body)
+	accessToken, refreshToken, user, status, err := LoginUser(db, body)
 
 	if status == 200 {
 		_, refreshTokenExpTime := jwt.ExpireInMonths(3)
 		jwt.SetRefreshTokenCookie(w, refreshToken, refreshTokenExpTime)
-		response.Success[LoginResponse](w, status, LoginResponse{Token: accessToken})
+		response.Success[LoginResponse](w, status, LoginResponse{Token: accessToken, User: user})
 		return
 	} else {
 		response.Error[any](w, status, nil, err)
